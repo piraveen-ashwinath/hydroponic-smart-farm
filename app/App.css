@@ -1,0 +1,109 @@
+#root {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 2rem;
+  text-align: center;
+}
+
+.card-img-top-ph{
+  height: 250px;
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  width: 200px;
+}
+
+.card-img-top-ec{
+  height: 250px;
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  width: 200px;
+}
+
+.card-img-top-temp{
+  height: 250px;
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  width: 200px;
+}
+
+.card {
+  padding: 2em;
+  width: 20rem;
+ 
+}
+
+.flex-container{
+  display: flex;
+  justify-content: space-between;
+  padding: 2em;
+}
+
+.flex-cont{
+  display: flex;
+  justify-content: center;
+  padding: 2em;
+}
+
+.flexi1{
+  display: flex;
+  justify-content: center;
+  padding: 2em;
+}
+
+.flexi2{
+  display: flex;
+  justify-content: center;
+  padding: 2em;
+}
+
+.flexi3{
+  display: flex;
+  justify-content: center;
+  padding: 2em;
+}
+
+.card1{
+  padding: 2em;
+  width: 300rem;
+}
+
+.card2{
+  padding: 2em;
+  width: 300rem;
+}
+
+.card3{
+  padding: 2em;
+  width: 300rem;
+}
+
+.chart1 {
+  flex: 4;
+  -webkit-box-shadow: 2px 4px 10px 1px rgba(0, 0, 0, 0.47);
+  box-shadow: 2px 4px 10px 1px rgba(201, 201, 201, 0.47);
+  padding: 10px;
+  color: gray;
+}
+
+.chart2 {
+  flex: 4;
+  -webkit-box-shadow: 2px 4px 10px 1px rgba(0, 0, 0, 0.47);
+  box-shadow: 2px 4px 10px 1px rgba(201, 201, 201, 0.47);
+  padding: 10px;
+  color: gray;
+}
+
+.chart3 {
+  flex: 4;
+  -webkit-box-shadow: 2px 4px 10px 1px rgba(0, 0, 0, 0.47);
+  box-shadow: 2px 4px 10px 1px rgba(201, 201, 201, 0.47);
+  padding: 10px;
+  color: gray;
+}
+
+  .title {
+    margin-bottom: 20px;
+  }

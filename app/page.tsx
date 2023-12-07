@@ -1,113 +1,260 @@
-import Image from 'next/image'
+//import { useState } from 'react'
+//import reactLogo from './assets/react.svg'
+//import viteLogo from '/vite.svg'
+"use client";
+import {Routes, Route, BrowserRouter as Router, useNavigate} from 'react-router-dom';
+import 'bootstrap/dist/css/bootstrap.css'
+import './App.css'
+import { db } from "./firebase";
+import { database } from "./firebase";
+import { getDatabase, onValue, ref } from "firebase/database";
+import {
+  getDocs,
+  collection,
+  addDoc,
+  deleteDoc,
+  updateDoc,
+  doc,
+  onSnapshot,
+  query,
+  getDoc,
+  orderBy,
+} from "firebase/firestore";
+import { useEffect, useState } from 'react';
+//import Routes from './routes';
+import ReactDOM from 'react-dom';
+import { Line } from "react-chartjs-2";
+import { Chart as ChartJS } from "chart.js/auto";
+import { CategoryScale, Chart, registerables } from "chart.js";
+import Link from 'next/link'
+//import { Chart } from "react-google-charts";
+import React from "react";
+//mport { render } from "react-dom";
+//import * as React from 'react';
+//import { LineChart } from '@mui/x-charts/LineChart';
+//import {Line, LineChart,  XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+// Import the functions you need from the SDKs you need
+Chart.register(CategoryScale,...registerables);
 
-export default function Home() {
+function App() {
+  
+  const ph:any=[];
+  const ec:any=[];
+  const temp:any=[];
+  const time:any=[];
+  const [valList, setValList] = useState([] as any);
+  const valListRef=collection(db, "sensorValues");
+  const docRef = doc(db, "sensorValues", "SensorValues");
+  const docSnap = getDoc(docRef);
+  const q = query(valListRef, orderBy("name", "asc"));
+  const [valData, setValData]:any = useState([]);
+/*
+  useEffect(() => {
+    const query = ref(database, "sensorreadings");
+    return onValue(query, (snapshot) => {
+      const data = snapshot.val();
+
+      if (snapshot.exists()) {
+        Object.values(data).map((sense) => {
+          setUserData((userData:any) => [...userData, sense]);
+        });
+      }
+    });
+  }, []);
+*/
+/*
+  const data = [
+    ["Date", "pH values", "EC values", "Temperature"],
+    [time, ph, ec, temp],
+    //["2005", 4.8, 3.4, 19],
+    //["2006", 6.7, 1.8, 20],
+    //["2007", 7.1, 0.9, 21],
+  ];
+  
+  const options = {
+    title: "Sensor Reading Values",
+    curveType: "function",
+    legend: { position: "bottom" },
+  };*/
+
+  useEffect(() => {
+    // Set up the onQuerySnapshot listener on a collection
+    // for more info https://firebase.google.com/docs/firestore/query-data/listen#listen_to_multiple_documents_in_a_collection
+    const unsubscribe = onSnapshot(query(valListRef), (snapshot) => {
+                const updatedValues = snapshot.docs.map((snapshot:any) => ({
+                    id: snapshot.id,
+                    ...snapshot.data(),
+                }));
+                setValList(updatedValues);
+            });
+
+        // Cleanup listener
+        return () => unsubscribe();
+  }, []);
+
+  const dataPh = {
+    labels: time,
+    datasets: [{
+      label: 'pH Values',
+      data: valList.map((value:any)=>(value.phValues)),
+      //data:[6.5,8.9,2.3],
+      fill: false,
+      borderColor: 'rgb(75, 192, 192)',
+      tension: 0.1
+    }]
+  };
+
+  const dataEc = {
+    labels: time,
+    datasets: [{
+      label: 'EC Values',
+      data: valList.map((value:any)=>(value.ecValues)),
+      //data:[6.5,8.9,2.3],
+      fill: false,
+      borderColor: 'rgb(75, 192, 192)',
+      tension: 0.1
+    }]
+  };
+
+  const dataTemp = {
+    type:'line',
+    labels: [time,time],
+    datasets: [{
+      label: 'Temperature Readings',
+      data: valList.map((value:any)=>(value.tempValues)),
+      //data:[6.5,8.9,2.3],
+      fill: false,
+      borderColor: 'rgb(75, 192, 192)',
+      tension: 0.1,
+    }],
+    options: {
+      scales: {
+        xAxes: [{
+          type: 'time',
+          distribution: 'linear',
+        }],
+        title: {
+          display: false,
+        }
+      }
+    }
+  };
+
+  const config = {
+    type: 'line',
+    data: dataPh,
+  };
+
   return (
-    <main className="flex min-h-screen flex-col items-center justify-between p-24">
-      <div className="z-10 max-w-5xl w-full items-center justify-between font-mono text-sm lg:flex">
-        <p className="fixed left-0 top-0 flex w-full justify-center border-b border-gray-300 bg-gradient-to-b from-zinc-200 pb-6 pt-8 backdrop-blur-2xl dark:border-neutral-800 dark:bg-zinc-800/30 dark:from-inherit lg:static lg:w-auto  lg:rounded-xl lg:border lg:bg-gray-200 lg:p-4 lg:dark:bg-zinc-800/30">
-          Get started by editing&nbsp;
-          <code className="font-mono font-bold">app/page.tsx</code>
-        </p>
-        <div className="fixed bottom-0 left-0 flex h-48 w-full items-end justify-center bg-gradient-to-t from-white via-white dark:from-black dark:via-black lg:static lg:h-auto lg:w-auto lg:bg-none">
-          <a
-            className="pointer-events-none flex place-items-center gap-2 p-8 lg:pointer-events-auto lg:p-0"
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            By{' '}
-            <Image
-              src="/vercel.svg"
-              alt="Vercel Logo"
-              className="dark:invert"
-              width={100}
-              height={24}
-              priority
-            />
-          </a>
-        </div>
-      </div>
+    <>
+    {time.push(valList.map((value:any)=>(value.date)))}
+    {ph.push(valList.map((value:any)=>(value.phValues)))}
+    {ec.push(valList.map((value:any)=>(value.ecValues)))}
+    {temp.push(valList.map((value:any)=>(value.tempValues)))}
+    <div className='flex-cont'>
+    <img src='/3d-casual-life-ecology-hand.png' alt="" width="40" height="34" className="d-inline-block align-text-top"/> 
+      <h1 className='titleDashboard'>Smart Farm Dashboard</h1>
+    </div>
+    
+      <div className='flex-container'>
+      <div className="card" style={{backgroundColor:"#292928"}}>
+  <img src="/levels-pipette.png" className="card-img-top-ph" alt="..." />
 
-      <div className="relative flex place-items-center before:absolute before:h-[300px] before:w-[480px] before:-translate-x-1/2 before:rounded-full before:bg-gradient-radial before:from-white before:to-transparent before:blur-2xl before:content-[''] after:absolute after:-z-20 after:h-[180px] after:w-[240px] after:translate-x-1/3 after:bg-gradient-conic after:from-sky-200 after:via-blue-200 after:blur-2xl after:content-[''] before:dark:bg-gradient-to-br before:dark:from-transparent before:dark:to-blue-700 before:dark:opacity-10 after:dark:from-sky-900 after:dark:via-[#0141ff] after:dark:opacity-40 before:lg:h-[360px] z-[-1]">
-        <Image
-          className="relative dark:drop-shadow-[0_0_0.3rem_#ffffff70] dark:invert"
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={180}
-          height={37}
-          priority
-        />
-      </div>
+  <div className="card-body">
+  <h3 className="card-title" style={{color:"whitesmoke"}}>pH levels</h3>
+  {valList.map((value:any) => (<h1 className="phValue" style={{color:"whitesmoke"}}>{value.phValues}</h1>))}
+    
+    <p className="card-textPH" style={{color:"whitesmoke"}}></p>
+    <a href="/ph" className="btn btn-primary" style={{backgroundColor:"teal"}}>View Data Log</a>
+  </div>
+</div>
 
-      <div className="mb-32 grid text-center lg:max-w-5xl lg:w-full lg:mb-0 lg:grid-cols-4 lg:text-left">
-        <a
-          href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Docs{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Find in-depth information about Next.js features and API.
-          </p>
-        </a>
+<div className="card" style={{backgroundColor:"#292928"}}>
+  <img src='/3d-casual-life-green-leaf-and-energy.png' className="card-img-top-ec" alt="..."/>
+  <div className="card-body">
+  <h3 className="card-title" style={{color:"whitesmoke"}}>EC values</h3>
+  {valList.map((value:any) => (<h1 className="ecValue" style={{color:"whitesmoke"}}>{value.ecValues}</h1>))}
+  
+  <p className="card-textEC" style={{color:"whitesmoke"}}></p>
+    <Link href="/ec" className="btn btn-primary" style={{backgroundColor:"teal"}}>View Data Log</Link>
+  </div>
+</div>
 
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Learn{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Learn about Next.js in an interactive course with&nbsp;quizzes!
-          </p>
-        </a>
+<div className="card" style={{backgroundColor:"#292928"}}>
+  <img src='/morphis-glass-thermometer.png' className="card-img-top-temp" alt="..."/>
+  <div className="card-body">
+  <h3 className="card-title" style={{color:"whitesmoke"}}>Temperature</h3>
+    {valList.map((value:any) => (<h1 className='tempValue' style={{color:"whitesmoke"}}>{value.tempValues} °C</h1>))}
+    
+    <p className="card-textTemp" style={{color:"whitesmoke"}}></p>
+    <Link href="/temp" className="btn btn-primary" style={{backgroundColor:"teal"}}>View Data Log</Link>
+  </div>
+</div>
+</div>
 
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Templates{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Explore starter templates for Next.js.
-          </p>
-        </a>
+<div className='flexi1'>
+<div className="card1" style={{backgroundColor:"whitesmoke"}}>
+<div className="card-body">
+  <h3 className="card-title" style={{color:"#292928"}}>pH Values Trend Analysis</h3>
+  <div className="chart1">
+<Line data={dataPh}></Line>
 
-        <a
-          href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Deploy{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Instantly deploy your Next.js site to a shareable URL with Vercel.
-          </p>
-        </a>
-      </div>
-    </main>
+  {/*<Chart
+      chartType="LineChart"
+      width="100%"
+      height="400px"
+      data={data}
+      options={options}
+  />*/}
+      
+    </div>
+</div>
+</div>
+</div>
+
+
+<div className='flexi2'>
+<div className="card2" style={{backgroundColor:"whitesmoke"}}>
+<div className="card-body">
+  <h3 className="card-title" style={{color:"#292928"}}>EC Values Trend Analysis</h3>
+  <div className="chart2">
+<Line data={dataEc}></Line>
+
+  {/*<Chart
+      chartType="LineChart"
+      width="100%"
+      height="400px"
+      data={data}
+      options={options}
+  />*/}
+      
+    </div>
+</div>
+</div>
+</div>
+
+<div className='flexi3'>
+<div className="card3" style={{backgroundColor:"whitesmoke"}}>
+<div className="card-body">
+  <h3 className="card-title" style={{color:"#292928"}}>Temperature Readings Trend Analysis</h3>
+  <div className="chart3">
+<Line data={dataTemp}></Line>
+
+  {/*<Chart
+      chartType="LineChart"
+      width="100%"
+      height="400px"
+      data={data}
+      options={options}
+  />*/}
+      
+    </div>
+</div>
+</div>
+</div>
+
+    </>
   )
 }
+
+export default App
