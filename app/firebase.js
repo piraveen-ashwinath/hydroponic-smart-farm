@@ -9,18 +9,18 @@ import { getDatabase } from "firebase/database";
 // Your web app's Firebase configuration
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
-  apiKey: "AIzaSyAEWe1O8silkE7qM6Os1MAah16nyO7C7R4",
-  authDomain: "smartfarm-hydroponic.firebaseapp.com",
-  databaseURL: "https://smartfarm-hydroponic-default-rtdb.asia-southeast1.firebasedatabase.app",
-  projectId: "smartfarm-hydroponic",
-  storageBucket: "smartfarm-hydroponic.appspot.com",
-  messagingSenderId: "777013021905",
-  appId: "1:777013021905:web:44992a1946164f20a849f0",
-  measurementId: "G-R3GNRX5BGZ"
+  apiKey: "AIzaSyCpUw32P5pNc9QjdTvR3HfDGCpzzynsYlo",
+  authDomain: "fertigasiutm-23aaa.firebaseapp.com",
+  databaseURL: "https://fertigasiutm-23aaa.firebaseio.com",
+  projectId: "fertigasiutm-23aaa",
+  storageBucket: "fertigasiutm-23aaa.appspot.com",
+  messagingSenderId: "516779375289",
+  appId: "1:516779375289:web:38e3d75c3000d7455bf968",
+  measurementId: "G-6G0BPP7ZDB"
 };
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const analytics = getAnalytics(app);
-export const database = getDatabase(app);
+export const database = getFirestore(app);
 export const db = getFirestore(app);

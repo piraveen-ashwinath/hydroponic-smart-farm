@@ -5,9 +5,9 @@
 import {Routes, Route, BrowserRouter as Router, useNavigate} from 'react-router-dom';
 import 'bootstrap/dist/css/bootstrap.css'
 import './App.css'
-import { db } from "./firebase";
-import { database } from "./firebase";
-import { getDatabase, onValue, ref } from "firebase/database";
+import { db, database } from "./firebase";
+//import { database } from "./firebase";
+import { getDatabase, onValue, ref, get } from "firebase/database";
 import {
   getDocs,
   collection,
@@ -25,16 +25,19 @@ import { useEffect, useState } from 'react';
 import ReactDOM from 'react-dom';
 import { Line } from "react-chartjs-2";
 import { Chart as ChartJS } from "chart.js/auto";
-import { CategoryScale, Chart, registerables } from "chart.js";
+import { CategoryScale, Chart, registerables, LinearScale, PointElement, Tooltip, Legend, TimeScale } from "chart.js";
 import Link from 'next/link'
 //import { Chart } from "react-google-charts";
 import React from "react";
+import { object } from '@angular/fire/database';
+//import { LineChart, PieChart } from 'react-chartkick'
+import 'chartkick/chart.js'
 //mport { render } from "react-dom";
 //import * as React from 'react';
 //import { LineChart } from '@mui/x-charts/LineChart';
 //import {Line, LineChart,  XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 // Import the functions you need from the SDKs you need
-Chart.register(CategoryScale,...registerables);
+Chart.register(LinearScale, PointElement, Tooltip, Legend, TimeScale);
 
 function App() {
   
@@ -43,8 +46,8 @@ function App() {
   const temp:any=[];
   const time:any=[];
   const [valList, setValList] = useState([] as any);
-  const valListRef=collection(db, "sensorValues");
-  const docRef = doc(db, "sensorValues", "SensorValues");
+  const valListRef=collection(db, "sensorvalues");
+  const docRef = doc(database, "sensorreadings", "SensorReadings");
   const docSnap = getDoc(docRef);
   const q = query(valListRef, orderBy("name", "asc"));
   const [valData, setValData]:any = useState([]);
@@ -76,6 +79,39 @@ function App() {
     curveType: "function",
     legend: { position: "bottom" },
   };*/
+/*
+useEffect(()=>{
+  const valListRef= ref(database,'sensorreadings');
+  get(valListRef).then((snapshot)=>{
+    if (snapshot.exists()){
+      const valArray=Object.entries(snapshot.val()).map(([id,data])=>({
+        id,
+        ...data,
+      }));
+      setValList(valArray);
+    }else{
+
+    }
+  })
+})
+*/
+
+
+useEffect(() => {
+  // Set up the onQuerySnapshot listener on a collection
+  // for more info https://firebase.google.com/docs/firestore/query-data/listen#listen_to_multiple_documents_in_a_collection
+  const unsubscribe = onSnapshot(query(collection(database, "sensorreadings")), (snapshot) => {
+              const updatedData = snapshot.docs.map((snapshot:any) => ({
+                  id: snapshot.id,
+                  ...snapshot.data(),
+              }));
+              setValData(updatedData);
+          });
+
+      // Cleanup listener
+      return () => unsubscribe();
+}, []);
+
 
   useEffect(() => {
     // Set up the onQuerySnapshot listener on a collection
@@ -93,19 +129,34 @@ function App() {
   }, []);
 
   const dataPh = {
-    labels: time,
+    labels: valList.map((value:any)=>(value.date)),
     datasets: [{
       label: 'pH Values',
+      //data: valList.map((value:any)=>(value.phValues)),
       data: valList.map((value:any)=>(value.phValues)),
       //data:[6.5,8.9,2.3],
       fill: false,
       borderColor: 'rgb(75, 192, 192)',
       tension: 0.1
-    }]
+    }],
+    options: {
+      scales: {
+        x: {
+          type: 'time',
+          time:{
+            unit:'day'
+          }
+          //distribution: 'linear',
+        },
+        title: {
+          display: false,
+        }
+      }
+    }
   };
 
   const dataEc = {
-    labels: time,
+    labels: valList.map((value:any)=>(value.date)),
     datasets: [{
       label: 'EC Values',
       data: valList.map((value:any)=>(value.ecValues)),
@@ -113,15 +164,30 @@ function App() {
       fill: false,
       borderColor: 'rgb(75, 192, 192)',
       tension: 0.1
-    }]
+    }],
+    options: {
+      scales: {
+        x: {
+          type: 'time',
+          time:{
+            unit:'day'
+          }
+          //distribution: 'linear',
+        },
+        title: {
+          display: false,
+        }
+      }
+    }
   };
 
   const dataTemp = {
-    type:'line',
-    labels: [time,time],
+    //type:'line',
+    labels: valList.map((value:any)=>(value.date)),
     datasets: [{
       label: 'Temperature Readings',
       data: valList.map((value:any)=>(value.tempValues)),
+      //data:temp,
       //data:[6.5,8.9,2.3],
       fill: false,
       borderColor: 'rgb(75, 192, 192)',
@@ -129,10 +195,13 @@ function App() {
     }],
     options: {
       scales: {
-        xAxes: [{
+        x: {
           type: 'time',
-          distribution: 'linear',
-        }],
+          time:{
+            unit:'day'
+          }
+          //distribution: 'linear',
+        },
         title: {
           display: false,
         }
@@ -162,7 +231,7 @@ function App() {
 
   <div className="card-body">
   <h3 className="card-title" style={{color:"whitesmoke"}}>pH levels</h3>
-  {valList.map((value:any) => (<h1 className="phValue" style={{color:"whitesmoke"}}>{value.phValues}</h1>))}
+  {valData.map((data:any) => (<h1 className="phValue" style={{color:"whitesmoke"}}>{data.phread}</h1>))}
     
     <p className="card-textPH" style={{color:"whitesmoke"}}></p>
     <a href="/ph" className="btn btn-primary" style={{backgroundColor:"teal"}}>View Data Log</a>
@@ -173,7 +242,7 @@ function App() {
   <img src='/3d-casual-life-green-leaf-and-energy.png' className="card-img-top-ec" alt="..."/>
   <div className="card-body">
   <h3 className="card-title" style={{color:"whitesmoke"}}>EC values</h3>
-  {valList.map((value:any) => (<h1 className="ecValue" style={{color:"whitesmoke"}}>{value.ecValues}</h1>))}
+  {valData.map((data:any) => (<h1 className="ecValue" style={{color:"whitesmoke"}}>{data.ecread}</h1>))}
   
   <p className="card-textEC" style={{color:"whitesmoke"}}></p>
     <Link href="/ec" className="btn btn-primary" style={{backgroundColor:"teal"}}>View Data Log</Link>
@@ -184,7 +253,7 @@ function App() {
   <img src='/morphis-glass-thermometer.png' className="card-img-top-temp" alt="..."/>
   <div className="card-body">
   <h3 className="card-title" style={{color:"whitesmoke"}}>Temperature</h3>
-    {valList.map((value:any) => (<h1 className='tempValue' style={{color:"whitesmoke"}}>{value.tempValues} °C</h1>))}
+    {valData.map((data:any) => (<h1 className='tempValue' style={{color:"whitesmoke"}}>{data.tempread} °C</h1>))}
     
     <p className="card-textTemp" style={{color:"whitesmoke"}}></p>
     <Link href="/temp" className="btn btn-primary" style={{backgroundColor:"teal"}}>View Data Log</Link>
